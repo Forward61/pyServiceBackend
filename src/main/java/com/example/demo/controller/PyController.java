@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 @CrossOrigin
 @RestController
@@ -24,8 +25,18 @@ public class PyController {
 
     @RequestMapping("/py/textUpload")
     public String returnObj(@RequestParam(value = "content") String content, @RequestParam(value = "code") String code, @RequestParam(value = "program") String program) {
-        String filename = "/app/weblogic/response/wzys/02=应缴资金查询GBK响应.txt";
+        System.out.println("当前时间：" + new Date());
+
+        String filename = "";
         System.out.println("program :" + program + " ,code " + code + ", content :" + content);
+        if("wz".equals(program)){
+            if ("02".equals(code)){
+                filename = "/app/weblogic/response/wzys/02=应缴资金查询GBK响应.txt";
+            }else if("04".equals(code)){
+                filename = "/app/weblogic/response/wzys/04=应付资金查询GBK响应.txt";
+            }
+        }
+        System.out.println("文件名：" + filename);
         try {
 //            File f = new File(filename);
 //            if (!f.exists()) {
@@ -33,11 +44,21 @@ public class PyController {
 //            }
             File file = new File(filename);
             FileOutputStream fos = new FileOutputStream(file,false);
-            Writer w = new OutputStreamWriter(fos, "GBK");
-            w.write(content);
+            if("wz".equals(program)){
+                Writer w = new OutputStreamWriter(fos, "GBK");
+                w.write(content);
 
-            w.flush();
-            w.close();
+                w.flush();
+                w.close();
+            }else{
+                Writer w = new OutputStreamWriter(fos, "UTF-8");
+                w.write(content);
+
+                w.flush();
+                w.close();
+            }
+
+
 
 
 
@@ -60,8 +81,25 @@ public class PyController {
 
     @RequestMapping("/py/textReader")
     public String returnReaderObj(@RequestParam(value = "content") String content, @RequestParam(value = "code") String code, @RequestParam(value = "program") String program) {
-        String filename = "/app/weblogic/response/wzys/02=应缴资金查询GBK响应.txt";
+        System.out.println("当前时间：" + new Date());
+        String filename = "";
         System.out.println("program :" + program + " ,code " + code + ", content :" + content);
+        if("wz".equals(program)){
+            if ("02".equals(code)){
+                filename = "/app/weblogic/response/wzys/02=应缴资金查询GBK响应.txt";
+            }else if("04".equals(code)){
+                filename = "/app/weblogic/response/wzys/04=应付资金查询GBK响应.txt";
+
+            }
+        }else if("nw".equals(program)){
+            if("10".equals(code)){
+                filename = "/app/weblogic/response/nw/10=银行查询客户欠费交易响应.xml";
+            }else if("43".equals(code)){
+                filename = "/app/weblogic/response/nw/43=银行查询客户信息交易响应.xml";
+            }
+
+        }
+        System.out.println("文件名：" + filename);
 
         File file = new File(filename);
         if (null == file || 0 == file.length() || !file.exists()) {
@@ -71,12 +109,24 @@ public class PyController {
         StringBuffer buffer = new StringBuffer();
         String line = null;
         try{
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(filename),"GBK");
-            BufferedReader reader = new BufferedReader(isr);
-            while((line=reader.readLine())!=null){
-                buffer.append(line);
+            if("wz".equals(program)){
+                InputStreamReader isr = new InputStreamReader(new FileInputStream(filename),"GBK");
+                BufferedReader reader = new BufferedReader(isr);
+                while((line=reader.readLine())!=null){
+                    buffer.append(line);
+                }
+                reader.close();
+            }else
+            {
+                InputStreamReader isr = new InputStreamReader(new FileInputStream(filename),"UTF-8");
+                BufferedReader reader = new BufferedReader(isr);
+                while((line=reader.readLine())!=null){
+                    buffer.append(line);
+                }
+                reader.close();
             }
-            reader.close();
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
